@@ -11,6 +11,7 @@ from matplotlib.widgets import Slider, Button
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from scipy.spatial.transform import Rotation as R
 import wfu_stewart
+import time
 
 # The function to be called anytime a slider's value changes
 def update_x(val):
@@ -36,14 +37,14 @@ def update_ry(val):
 def update_rz(val):
     viewer_rotation[2] = val
     update_model()
-    
+
 def update_model():
-    ax.cla()
-    ax.axes.set_xlim3d(left=-150, right=150) 
-    ax.axes.set_ylim3d(bottom=-150, top=150) 
-    ax.axes.set_zlim3d(bottom=-10, top=250) 
+    #ax.cla()
+    #ax.axes.set_xlim3d(left=-150, right=150) 
+    #ax.axes.set_ylim3d(bottom=-150, top=150) 
+    #ax.axes.set_zlim3d(bottom=-10, top=250) 
     platform.move(viewer_pose)
-    print(viewer_rotation)
+    #print(viewer_rotation)
     viewer_rotation_matrix = R.from_euler('xyz',viewer_rotation,degrees=True).as_matrix()
     platform.rotate(viewer_rotation_matrix)
     # Data for three-dimensional scattered points
@@ -54,7 +55,49 @@ def update_model():
     zdata = p_base[:,2]
     xdata = p_base[:,0]
     ydata = p_base[:,1]
-    ax.scatter3D(xdata, ydata, zdata);
+    top_points._offsets3d = (xdata, ydata, zdata);
+    
+    verts = [tuple(p) for p in p_base[:,0:3]]
+    top_poly.set_verts([verts])
+    
+    # Data for horns
+    zdata = platform.a[:,2]
+    xdata = platform.a[:,0]
+    ydata = platform.a[:,1]
+    horn_points._offsets3d = (xdata,ydata,zdata)
+    
+    # Drawing legs
+    for i,l in enumerate(leg_lines):
+        l[0].set_data_3d([platform.a[i,0],p_base[i,0]],
+              [platform.a[i,1],p_base[i,1]],
+              [platform.a[i,2],p_base[i,2]])
+        
+    # Drawing horn lines
+    for i,l in enumerate(horn_lines):
+        l[0].set_data_3d([platform.baseJoints[i,0], platform.a[i,0]],
+                  [platform.baseJoints[i,1], platform.a[i,1]],
+                  [platform.baseJoints[i,2], platform.a[i,2]])
+    plt.draw()
+    plt.pause(0.0001)
+    
+def create_model():
+    ax.cla()
+    ax.axes.set_xlim3d(left=-150, right=150) 
+    ax.axes.set_ylim3d(bottom=-150, top=150) 
+    ax.axes.set_zlim3d(bottom=-10, top=250) 
+    platform.move(viewer_pose)
+    #print(viewer_rotation)
+    viewer_rotation_matrix = R.from_euler('xyz',viewer_rotation,degrees=True).as_matrix()
+    platform.rotate(viewer_rotation_matrix)
+    # Data for three-dimensional scattered points
+    p = platform.platformJoints.transpose()
+    p = np.concatenate((p,np.ones((1,6))))
+    
+    p_base = np.matmul(platform.desired_pose, p).transpose()
+    zdata = p_base[:,2]
+    xdata = p_base[:,0]
+    ydata = p_base[:,1]
+    top_points = ax.scatter3D(xdata, ydata, zdata);
     
     verts = [tuple(p) for p in p_base[:,0:3]]
     poly = Poly3DCollection([verts], alpha=0.8)
@@ -64,30 +107,33 @@ def update_model():
     zdata = platform.baseJoints[:,2]
     xdata = platform.baseJoints[:,0]
     ydata = platform.baseJoints[:,1]
-    ax.scatter3D(xdata, ydata, zdata);
+    bot_points = ax.scatter3D(xdata, ydata, zdata);
     
     # Data for horns
     zdata = platform.a[:,2]
     xdata = platform.a[:,0]
     ydata = platform.a[:,1]
-    ax.scatter3D(xdata,ydata,zdata)
+    horn_points = ax.scatter3D(xdata,ydata,zdata)
     
     # Drawing Legs
+    leg_lines = []
     for i in range(0,6):
-        ax.plot3D([platform.a[i,0],p_base[i,0]],
+        leg_lines.append(ax.plot3D([platform.a[i,0],p_base[i,0]],
               [platform.a[i,1],p_base[i,1]],
               [platform.a[i,2],p_base[i,2]],
               color='k',
-              alpha=0.3)
+              alpha=0.3))
     
     # Drawing Servo Horns
+    horn_lines = []
     for i in range(0,6):
-        ax.plot3D([platform.baseJoints[i,0], platform.a[i,0]],
+        horn_lines.append(ax.plot3D([platform.baseJoints[i,0], platform.a[i,0]],
                   [platform.baseJoints[i,1], platform.a[i,1]],
                   [platform.baseJoints[i,2], platform.a[i,2]], 
                   color='g',
-                  alpha=0.3)
-    
+                  alpha=0.3))
+    return top_points, poly, bot_points, horn_points, leg_lines, horn_lines
+
 platform = wfu_stewart.Platform()
 viewer_pose = np.array([0,0,0])
 viewer_rotation = np.array([0,0,0])
@@ -98,7 +144,7 @@ ax = plt.axes(projection='3d')
 ax.axes.set_xlim3d(left=-10, right=10) 
 ax.axes.set_ylim3d(bottom=-10, top=10) 
 ax.axes.set_zlim3d(bottom=-10, top=10)
-update_model()
+top_points, top_poly, bot_points, horn_points, leg_lines, horn_lines = create_model()
 
 axcolor = 'lightgoldenrodyellow'
 ax.margins(x=0)
@@ -185,3 +231,20 @@ def reset(event):
     z_rotation.reset()
     
 button.on_clicked(reset)
+
+import threading
+# Create a `matplotlib.widgets.Button` to reset the sliders to initial values.
+def run_trajectory(e):
+    times = 3
+    t = np.linspace(0,times*2*np.pi,50*times)
+    x_list = 30*np.sin(t)
+    y_list = 30*np.cos(t)
+    for x,y in zip(x_list,y_list):
+        #print(x)
+        viewer_rotation[0] = x
+        viewer_rotation[1] = y
+        update_model()
+        #time.sleep(.01)
+startax = plt.axes([0.8, 0.75, 0.1, 0.04])
+startButton = Button(startax, 'Start', color=axcolor, hovercolor='0.975')
+startButton.on_clicked(run_trajectory)
