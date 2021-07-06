@@ -53,17 +53,27 @@ class Platform:
             pose[2,3] = 120
             self.desired_pose = pose
             
-        def move(self, motion):
+        def height_offset(self, t):
             #Create new reference
-            desired_position = motion.copy()
+            desired_position = t.copy()
             #Adjust for platform height
-            desired_position[2] = motion[2] + self.initial_height
+            desired_position[2] = t[2] + self.initial_height
+            return desired_position
             
-            self.desired_pose[0:3,3] = desired_position
-            return self.calculate_angles()
+        def translate(self, motion):            
+            desired_position = self.height_offset(motion)
+            return self.update_pose(translation=desired_position)
         
         def rotate(self, rotation):
-            self.desired_pose[0:3,0:3] = rotation
+            return self.update_pose(rotation = rotation)
+        
+        def update_pose(self,translation=None,rotation=None):
+            if translation is not None:
+                translation = self.height_offset(translation)
+                self.desired_pose[0:3,3] = translation
+            if rotation is not None:
+                self.desired_pose[0:3,0:3] = rotation
+            
             return self.calculate_angles()
         
         def calculate_angles(self,
@@ -78,17 +88,9 @@ class Platform:
             M = 2*self.horn_length*(q[:,2] - self.baseJoints[:,2])
             N = 2*self.horn_length*(np.cos(self.beta) * (q[:,0]-self.baseJoints[:,0]) + \
                                     np.sin(self.beta) * (q[:,1]-self.baseJoints[:,1]))
-            if False:
-               print('L:')
-               print(L)
-               print('M:')
-               print(M)
-               print('N:')
-               print(N)
-               print('arc sin of')
-               print(L/np.sqrt(M**2+N**2))
+        
             self.alpha = np.arcsin(L/np.sqrt(M**2+N**2)) - np.arctan(N/M)
-            print(self.alpha)
+            
             if True:
                 self.visual_calculations()
             return self.alpha

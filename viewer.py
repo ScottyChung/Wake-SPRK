@@ -15,15 +15,15 @@ import time
 
 # The function to be called anytime a slider's value changes
 def update_x(val):
-    viewer_pose[0] = val
+    viewer_pos[0] = val
     update_model()
     
 def update_y(val):
-    viewer_pose[1] = val
+    viewer_pos[1] = val
     update_model()    
     
 def update_z(val):
-    viewer_pose[2] = val
+    viewer_pos[2] = val
     update_model()   
     
 def update_rx(val):
@@ -39,14 +39,10 @@ def update_rz(val):
     update_model()
 
 def update_model():
-    #ax.cla()
-    #ax.axes.set_xlim3d(left=-150, right=150) 
-    #ax.axes.set_ylim3d(bottom=-150, top=150) 
-    #ax.axes.set_zlim3d(bottom=-10, top=250) 
-    platform.move(viewer_pose)
-    #print(viewer_rotation)
+    
     viewer_rotation_matrix = R.from_euler('xyz',viewer_rotation,degrees=True).as_matrix()
-    platform.rotate(viewer_rotation_matrix)
+    
+    platform.update_pose(viewer_pos, viewer_rotation_matrix)
     # Data for three-dimensional scattered points
     p = platform.platformJoints.transpose()
     p = np.concatenate((p,np.ones((1,6))))
@@ -85,10 +81,9 @@ def create_model():
     ax.axes.set_xlim3d(left=-150, right=150) 
     ax.axes.set_ylim3d(bottom=-150, top=150) 
     ax.axes.set_zlim3d(bottom=-10, top=250) 
-    platform.move(viewer_pose)
-    #print(viewer_rotation)
+    
     viewer_rotation_matrix = R.from_euler('xyz',viewer_rotation,degrees=True).as_matrix()
-    platform.rotate(viewer_rotation_matrix)
+    platform.update_pose(viewer_pos, viewer_rotation_matrix)
     # Data for three-dimensional scattered points
     p = platform.platformJoints.transpose()
     p = np.concatenate((p,np.ones((1,6))))
@@ -135,7 +130,7 @@ def create_model():
     return top_points, poly, bot_points, horn_points, leg_lines, horn_lines
 
 platform = wfu_stewart.Platform()
-viewer_pose = np.array([0,0,0])
+viewer_pos = np.array([0,0,0])
 viewer_rotation = np.array([0,0,0])
 # Create the figure and the line that we will manipulate
 fig = plt.figure(figsize=(10,8))
