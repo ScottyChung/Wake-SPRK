@@ -90,7 +90,7 @@ class Platform:
                                     np.sin(self.beta) * (q[:,1]-self.baseJoints[:,1]))
         
             self.alpha = np.arcsin(L/np.sqrt(M**2+N**2)) - np.arctan(N/M)
-            
+            print(self.alpha)
             if True:
                 self.visual_calculations()
             return self.alpha
