@@ -33,8 +33,8 @@ class Platform:
             self.platformJoints = np.array([pJ1,pJ2,pJ3,pJ4,pJ5,pJ6])
             
             #Base Joint Locations
-            bJ1 = np.array([-16.6,117.9,0])
-            bJ2 = np.array([16.5,117.9,0])
+            bJ1 = np.array([-52.7,115.48,0])
+            bJ2 = np.array([52.7,115.48,0])
             bJ3 = R.from_euler('z',-120, degrees=True).apply(bJ1)
             bJ4 = R.from_euler('z',-120, degrees=True).apply(bJ2)
             bJ5 = R.from_euler('z',120, degrees=True).apply(bJ1)

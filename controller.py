@@ -37,6 +37,10 @@ class Dynamixel():
     ADDR_PRO_GOAL_POSITION      = 116
     ADDR_PRO_PRESENT_POSITION   = 132
     
+    # Data Byte Length
+    LEN_PRO_GOAL_POSITION       = 4
+    LEN_PRO_PRESENT_POSITION    = 4
+
     # Protocol version
     PROTOCOL_VERSION            = 2.0               # See which protocol version is used in the Dynamixel
     
@@ -46,7 +50,7 @@ class Dynamixel():
     TORQUE_ENABLE               = 1                 # Value for enabling the torque
     TORQUE_DISABLE              = 0                 # Value for disabling the torque
     DXL_MOVING_STATUS_THRESHOLD = 20                # Dynamixel moving status threshold
-    DEG_TO_PULSE = 0.879
+    DEG_TO_PULSE = 0.0879
     
     def __init__(self, portName, devicesID):
         '''
@@ -118,12 +122,13 @@ class Dynamixel():
     def set_all_position(self, angles):
         # Convert angles
         pulses = self._convert_angles(angles)
+        print(pulses)
         # Send to internal command
         self._send_goal_positions(pulses)
         
     def _convert_angles(self,angles):
         # Convert angle to pulse
-        pulses = [((180/pi)*a)/self.DEG_TO_PULSE for a in angles]
+        pulses = [int(((180/pi)*a)/self.DEG_TO_PULSE) for a in angles]
         pulses[0::2] = [p + 1024 for p in pulses[0::2]] # Odd index motor adjustment
         pulses[1::2] = [-p + 3072 for p in pulses[1::2]] # Even index motor adjustment
         return pulses
@@ -136,7 +141,7 @@ class Dynamixel():
                                    DXL_LOBYTE(DXL_HIWORD(pos)), 
                                    DXL_HIBYTE(DXL_HIWORD(pos))]
             
-            dxl_addparam_result = self.groupSyncWrite.addParam(self.devices.ID[idx],
+            dxl_addparam_result = self.groupSyncWrite.addParam(self.devicesID[idx],
                                                                param_goal_position)
             if dxl_addparam_result != True:
                 print("[ID:%03d] groupSyncWrite addparam failed" % self.devicesID[idx])
@@ -151,7 +156,7 @@ class Dynamixel():
         self.groupSyncWrite.clearParam()
     
     def disable_all_torque(self):
-        for d in self.deviceID:
+        for d in self.devicesID:
             self.disable_torque(d)
             
     def disable_torque(self,deviceID):

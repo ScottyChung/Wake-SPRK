@@ -12,6 +12,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from scipy.spatial.transform import Rotation as R
 import wfu_stewart
 from controller import Dynamixel
+import time
 
 # Slider Update Functions
 def update_x(val):
@@ -46,8 +47,9 @@ def update_model():
     #Update the models pose
     angles = platform.update_pose(viewer_pos, viewer_rotation_matrix)
     
-    #Send angles
-    dynamixel.set_all_position(angles)
+    if controller:
+        #Send angles
+        dynamixel.set_all_position(angles)
     
     # Data for three-dimensional scattered points
     p = platform.platformJoints.transpose()
@@ -153,9 +155,12 @@ ax.axes.set_zlim3d(bottom=-10, top=10)
 top_points, top_poly, bot_points, horn_points, leg_lines, horn_lines = create_model()
 
 # Create Controller
-portName = 'COM5'
-devicesID = [1,2,3,4,5,6]
-dynamixel = Dynamixel(portName, devicesID)
+controller = True
+if controller:
+    portName = 'COM5'
+    devicesID = [1,2,3,4,5,6]
+    dynamixel = Dynamixel(portName, devicesID)
+    dynamixel.enable_all_torque()
 
 axcolor = 'lightgoldenrodyellow'
 ax.margins(x=0)
@@ -168,16 +173,16 @@ axfreq = plt.axes([0.25, 0.12, 0.65, 0.03], facecolor=axcolor)
 x_position = Slider(
     ax=axfreq,
     label='X Position',
-    valmin=-30,
-    valmax=30,
+    valmin=-50,
+    valmax=50,
     valinit=0,
 )
 axfreq = plt.axes([0.25, 0.07, 0.65, 0.03], facecolor=axcolor)
 y_position = Slider(
     ax=axfreq,
     label='Y Position',
-    valmin=-30,
-    valmax=30,
+    valmin=-50,
+    valmax=50,
     valinit=0,
 )
 
@@ -185,8 +190,8 @@ axfreq = plt.axes([0.25, 0.02, 0.65, 0.03], facecolor=axcolor)
 z_position = Slider(
     ax=axfreq,
     label='Z Position',
-    valmin=-30,
-    valmax=30,
+    valmin=-50,
+    valmax=50,
     valinit=0,
 )
 
@@ -194,8 +199,8 @@ axfreq = plt.axes([0.01, 0.12, 0.03, 0.65], facecolor=axcolor)
 x_rotation = Slider(
     ax=axfreq,
     label='RX',
-    valmin=-30,
-    valmax=30,
+    valmin=-50,
+    valmax=50,
     valinit=0,
     orientation='vertical',
 )
@@ -204,8 +209,8 @@ axfreq = plt.axes([0.06, 0.12, 0.03, 0.65], facecolor=axcolor)
 y_rotation = Slider(
     ax=axfreq,
     label='RY',
-    valmin=-30,
-    valmax=30,
+    valmin=-50,
+    valmax=50,
     valinit=0,
     orientation='vertical',
 )
@@ -214,8 +219,8 @@ axfreq = plt.axes([0.11, 0.12, 0.03, 0.65], facecolor=axcolor)
 z_rotation = Slider(
     ax=axfreq,
     label='RZ',
-    valmin=-30,
-    valmax=30,
+    valmin=-50,
+    valmax=50,
     valinit=0,
     orientation='vertical',
 )
@@ -246,3 +251,13 @@ def reset(event):
 
 # Attach callback to reset button
 resetButton.on_clicked(reset)
+
+# Create a `matplotlib.widgets.Button` to close ports.
+closeax = plt.axes([0.8, 0.75, 0.1, 0.04])
+closeButton = Button(closeax, 'Quit', color=axcolor, hovercolor='0.975')
+
+def closePort(event):
+    dynamixel.close()
+    plt.close()
+    
+closeButton.on_clicked(closePort)
