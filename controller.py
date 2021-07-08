@@ -17,17 +17,9 @@
 # limitations under the License.
 ################################################################################
 
-# Author: Ryu Woon Jung (Leon)
+# Original Author: Ryu Woon Jung (Leon)
+# Edited by: Scotty Chung
 
-#
-# *********     Read and Write Example      *********
-#
-#
-# Available Dynamixel model on this example : All models using Protocol 2.0
-# This example is designed for using a Dynamixel PRO 54-200, and an USB2DYNAMIXEL.
-# To use another Dynamixel model, such as X series, see their details in E-Manual(emanual.robotis.com) and edit below variables yourself.
-# Be sure that Dynamixel PRO properties are already set as %% ID : 1 / Baudnum : 1 (Baudrate : 57600)
-#
 
 import os
 from math import pi
@@ -132,8 +124,8 @@ class Dynamixel():
     def _convert_angles(self,angles):
         # Convert angle to pulse
         pulses = [((180/pi)*a)/self.DEG_TO_PULSE for a in angles]
-        pulses[0::2] = pulses[0::2] + 1024 # Odd index motor adjustment
-        pulses[1::2] = -pulses[1::2] + 3072 # Even index motor adjustment
+        pulses[0::2] = [p + 1024 for p in pulses[0::2]] # Odd index motor adjustment
+        pulses[1::2] = [-p + 3072 for p in pulses[1::2]] # Even index motor adjustment
         return pulses
     
     def _send_goal_positions(self, dxl_goal_positions):
@@ -146,7 +138,10 @@ class Dynamixel():
             
             dxl_addparam_result = self.groupSyncWrite.addParam(self.devices.ID[idx],
                                                                param_goal_position)
-        
+            if dxl_addparam_result != True:
+                print("[ID:%03d] groupSyncWrite addparam failed" % self.devicesID[idx])
+                quit()
+                
         # Write goal position
         # Syncwrite goal position
         dxl_comm_result = self.groupSyncWrite.txPacket()

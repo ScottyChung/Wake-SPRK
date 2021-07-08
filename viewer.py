@@ -11,9 +11,9 @@ from matplotlib.widgets import Slider, Button
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from scipy.spatial.transform import Rotation as R
 import wfu_stewart
-import time
+from controller import Dynamixel
 
-# The function to be called anytime a slider's value changes
+# Slider Update Functions
 def update_x(val):
     viewer_pos[0] = val
     update_model()
@@ -40,9 +40,15 @@ def update_rz(val):
 
 def update_model():
     
+    # Builds rotation matrix 
     viewer_rotation_matrix = R.from_euler('xyz',viewer_rotation,degrees=True).as_matrix()
     
-    platform.update_pose(viewer_pos, viewer_rotation_matrix)
+    #Update the models pose
+    angles = platform.update_pose(viewer_pos, viewer_rotation_matrix)
+    
+    #Send angles
+    dynamixel.set_all_position(angles)
+    
     # Data for three-dimensional scattered points
     p = platform.platformJoints.transpose()
     p = np.concatenate((p,np.ones((1,6))))
@@ -77,6 +83,7 @@ def update_model():
     plt.pause(0.0001)
     
 def create_model():
+    #Creates
     ax.cla()
     ax.axes.set_xlim3d(left=-150, right=150) 
     ax.axes.set_ylim3d(bottom=-150, top=150) 
@@ -129,9 +136,11 @@ def create_model():
                   alpha=0.3))
     return top_points, poly, bot_points, horn_points, leg_lines, horn_lines
 
+# Initialize platform model and home position
 platform = wfu_stewart.Platform()
 viewer_pos = np.array([0,0,0])
 viewer_rotation = np.array([0,0,0])
+
 # Create the figure and the line that we will manipulate
 fig = plt.figure(figsize=(10,8))
 ax = plt.axes(projection='3d')
@@ -139,7 +148,14 @@ ax = plt.axes(projection='3d')
 ax.axes.set_xlim3d(left=-10, right=10) 
 ax.axes.set_ylim3d(bottom=-10, top=10) 
 ax.axes.set_zlim3d(bottom=-10, top=10)
+
+# Create Model
 top_points, top_poly, bot_points, horn_points, leg_lines, horn_lines = create_model()
+
+# Create Controller
+portName = 'COM5'
+devicesID = [1,2,3,4,5,6]
+dynamixel = Dynamixel(portName, devicesID)
 
 axcolor = 'lightgoldenrodyellow'
 ax.margins(x=0)
@@ -204,6 +220,13 @@ z_rotation = Slider(
     orientation='vertical',
 )
 
+sliders = [x_position,
+           y_position,
+           z_position,
+           x_rotation,
+           y_rotation,
+           z_rotation]
+
 # register the update function with each slider
 x_position.on_changed(update_x)
 y_position.on_changed(update_y)
@@ -215,31 +238,11 @@ z_rotation.on_changed(update_rz)
 
 # Create a `matplotlib.widgets.Button` to reset the sliders to initial values.
 resetax = plt.axes([0.8, 0.8, 0.1, 0.04])
-button = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
+resetButton = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
 
 def reset(event):
-    z_position.reset()
-    x_position.reset()
-    y_position.reset()
-    x_rotation.reset()
-    y_rotation.reset()
-    z_rotation.reset()
-    
-button.on_clicked(reset)
+    for s in sliders:
+        s.reset()
 
-import threading
-# Create a `matplotlib.widgets.Button` to reset the sliders to initial values.
-def run_trajectory(e):
-    times = 3
-    t = np.linspace(0,times*2*np.pi,50*times)
-    x_list = 30*np.sin(t)
-    y_list = 30*np.cos(t)
-    for x,y in zip(x_list,y_list):
-        #print(x)
-        viewer_rotation[0] = x
-        viewer_rotation[1] = y
-        update_model()
-        #time.sleep(.01)
-startax = plt.axes([0.8, 0.75, 0.1, 0.04])
-startButton = Button(startax, 'Start', color=axcolor, hovercolor='0.975')
-startButton.on_clicked(run_trajectory)
+# Attach callback to reset button
+resetButton.on_clicked(reset)
