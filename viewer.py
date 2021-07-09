@@ -155,7 +155,7 @@ ax.axes.set_zlim3d(bottom=-10, top=10)
 top_points, top_poly, bot_points, horn_points, leg_lines, horn_lines = create_model()
 
 # Create Controller
-controller = True
+controller = False
 if controller:
     portName = 'COM5'
     devicesID = [1,2,3,4,5,6]
@@ -252,8 +252,23 @@ def reset(event):
 # Attach callback to reset button
 resetButton.on_clicked(reset)
 
+def run_trajectory(e):
+    times = 3
+    t = np.linspace(0,times*2*np.pi,50*times)
+    x_list = 30*np.sin(t)
+    y_list = 30*np.cos(t)
+    for x,y in zip(x_list,y_list):
+        #print(x)
+        viewer_rotation[0] = x
+        viewer_rotation[1] = y
+        update_model()
+        #time.sleep(.01)
+startax = plt.axes([0.8, 0.75, 0.1, 0.04])
+startButton = Button(startax, 'Start', color=axcolor, hovercolor='0.975')
+startButton.on_clicked(run_trajectory)
+
 # Create a `matplotlib.widgets.Button` to close ports.
-closeax = plt.axes([0.8, 0.75, 0.1, 0.04])
+closeax = plt.axes([0.8, 0.7, 0.1, 0.04])
 closeButton = Button(closeax, 'Quit', color=axcolor, hovercolor='0.975')
 
 def closePort(event):
