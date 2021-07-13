@@ -21,7 +21,6 @@ class Platform:
             self.initial_height = height
             self.horn_length = horn_length
             self.leg_length = leg_length
-            self.initialize_home()
             
             #Platform Joint locations
             pJ1 = np.array([-16.5,87,0])
@@ -47,11 +46,13 @@ class Platform:
                                   -np.pi,
                                   0,
                                   np.pi/3])
+            self.initialize_home()
             
         def initialize_home(self):
             pose = np.eye(4)
-            pose[2,3] = 120
+            pose[2,3] = self.initial_height
             self.desired_pose = pose
+            self.calculate_angles()
             
         def height_offset(self, t):
             #Create new reference
@@ -60,11 +61,25 @@ class Platform:
             desired_position[2] = t[2] + self.initial_height
             return desired_position
             
-        def translate(self, motion):            
-            desired_position = self.height_offset(motion)
-            return self.update_pose(translation=desired_position)
+        def translate(self, motion):
+            '''
+            Moves platform to absolute cartesian position
+
+            Parameters
+            ----------
+            motion : numpy array
+                3d point repesenting the position
+
+            Returns
+            -------
+            numpy array of joint angles
+                joint angles to achieve the position.
+
+            '''
+            return self.update_pose(translation=motion)
         
-        def rotate(self, rotation):
+        def rotate(self, angles):
+            rotation = R.from_euler('xyz',angles,degrees=True).as_matrix()
             return self.update_pose(rotation = rotation)
         
         def update_pose(self,translation=None,rotation=None):
@@ -90,7 +105,7 @@ class Platform:
                                     np.sin(self.beta) * (q[:,1]-self.baseJoints[:,1]))
         
             self.alpha = np.arcsin(L/np.sqrt(M**2+N**2)) - np.arctan(N/M)
-            print(self.alpha)
+            #print(self.alpha)
             if True:
                 self.visual_calculations()
             return self.alpha

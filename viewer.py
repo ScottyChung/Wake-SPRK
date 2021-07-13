@@ -9,15 +9,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+from matplotlib.animation import FuncAnimation
 from scipy.spatial.transform import Rotation as R
 import wfu_stewart
 from controller import Dynamixel
 import time
+import threading
 
 # Slider Update Functions
 def update_x(val):
     viewer_pos[0] = val
-    update_model()
+    #update_model()
     
 def update_y(val):
     viewer_pos[1] = val
@@ -47,42 +49,41 @@ def update_model():
     #Update the models pose
     angles = platform.update_pose(viewer_pos, viewer_rotation_matrix)
     
-    if controller:
-        #Send angles
-        dynamixel.set_all_position(angles)
-    
-    # Data for three-dimensional scattered points
-    p = platform.platformJoints.transpose()
-    p = np.concatenate((p,np.ones((1,6))))
-    
-    p_base = np.matmul(platform.desired_pose, p).transpose()
-    zdata = p_base[:,2]
-    xdata = p_base[:,0]
-    ydata = p_base[:,1]
-    top_points._offsets3d = (xdata, ydata, zdata);
-    
-    verts = [tuple(p) for p in p_base[:,0:3]]
-    top_poly.set_verts([verts])
-    
-    # Data for horns
-    zdata = platform.a[:,2]
-    xdata = platform.a[:,0]
-    ydata = platform.a[:,1]
-    horn_points._offsets3d = (xdata,ydata,zdata)
-    
-    # Drawing legs
-    for i,l in enumerate(leg_lines):
-        l[0].set_data_3d([platform.a[i,0],p_base[i,0]],
-              [platform.a[i,1],p_base[i,1]],
-              [platform.a[i,2],p_base[i,2]])
+    viewer = False
+    if viewer:
+        # Data for three-dimensional scattered points
+        p = platform.platformJoints.transpose()
+        p = np.concatenate((p,np.ones((1,6))))
         
-    # Drawing horn lines
-    for i,l in enumerate(horn_lines):
-        l[0].set_data_3d([platform.baseJoints[i,0], platform.a[i,0]],
-                  [platform.baseJoints[i,1], platform.a[i,1]],
-                  [platform.baseJoints[i,2], platform.a[i,2]])
-    plt.draw()
-    plt.pause(0.0001)
+        p_base = np.matmul(platform.desired_pose, p).transpose()
+        zdata = p_base[:,2]
+        xdata = p_base[:,0]
+        ydata = p_base[:,1]
+        top_points._offsets3d = (xdata, ydata, zdata);
+        
+        verts = [tuple(p) for p in p_base[:,0:3]]
+        top_poly.set_verts([verts])
+        
+        # Data for horns
+        zdata = platform.a[:,2]
+        xdata = platform.a[:,0]
+        ydata = platform.a[:,1]
+        horn_points._offsets3d = (xdata,ydata,zdata)
+        
+        # Drawing legs
+        for i,l in enumerate(leg_lines):
+            l[0].set_data_3d([platform.a[i,0],p_base[i,0]],
+                  [platform.a[i,1],p_base[i,1]],
+                  [platform.a[i,2],p_base[i,2]])
+            
+        # Drawing horn lines
+        for i,l in enumerate(horn_lines):
+            l[0].set_data_3d([platform.baseJoints[i,0], platform.a[i,0]],
+                      [platform.baseJoints[i,1], platform.a[i,1]],
+                      [platform.baseJoints[i,2], platform.a[i,2]])
+        return [top_points]
+        #plt.draw()
+        #plt.pause(0.0001)
     
 def create_model():
     #Creates
@@ -146,10 +147,11 @@ viewer_rotation = np.array([0,0,0])
 # Create the figure and the line that we will manipulate
 fig = plt.figure(figsize=(10,8))
 ax = plt.axes(projection='3d')
-
 ax.axes.set_xlim3d(left=-10, right=10) 
 ax.axes.set_ylim3d(bottom=-10, top=10) 
 ax.axes.set_zlim3d(bottom=-10, top=10)
+
+#ani = FuncAnimation(fig, update_model)
 
 # Create Model
 top_points, top_poly, bot_points, horn_points, leg_lines, horn_lines = create_model()
@@ -157,10 +159,13 @@ top_points, top_poly, bot_points, horn_points, leg_lines, horn_lines = create_mo
 # Create Controller
 controller = False
 if controller:
-    portName = 'COM5'
+    portName = 'COM4'
     devicesID = [1,2,3,4,5,6]
     dynamixel = Dynamixel(portName, devicesID)
     dynamixel.enable_all_torque()
+    dynamixel.add_model(platform)
+    t1 = threading.Thread(target=dynamixel.run)
+    t1.start()
 
 axcolor = 'lightgoldenrodyellow'
 ax.margins(x=0)
@@ -253,16 +258,18 @@ def reset(event):
 resetButton.on_clicked(reset)
 
 def run_trajectory(e):
-    times = 3
-    t = np.linspace(0,times*2*np.pi,50*times)
+    times = 10
+    t = np.linspace(0,2*np.pi,50*times)
     x_list = 30*np.sin(t)
     y_list = 30*np.cos(t)
     for x,y in zip(x_list,y_list):
         #print(x)
         viewer_rotation[0] = x
-        viewer_rotation[1] = y
+        #viewer_rotation[1] = y
+        #viewer_pos[2] = x
         update_model()
-        #time.sleep(.01)
+        #print('here')
+        #time.sleep(0.01)
 startax = plt.axes([0.8, 0.75, 0.1, 0.04])
 startButton = Button(startax, 'Start', color=axcolor, hovercolor='0.975')
 startButton.on_clicked(run_trajectory)

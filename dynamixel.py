@@ -24,6 +24,7 @@
 import os
 from math import pi
 import time
+from threading import Thread
 
 def getch():
     return os.raw_input()
@@ -32,7 +33,7 @@ from dynamixel_sdk import PortHandler,PacketHandler, \
     COMM_SUCCESS, GroupSyncWrite, \
     DXL_LOBYTE, DXL_LOWORD, DXL_HIBYTE, DXL_HIWORD               # Uses Dynamixel SDK library
 
-class Dynamixel():
+class Dynamixel(Thread):
     # Control table address
     ADDR_PRO_TORQUE_ENABLE      = 64               # Control table address is different in Dynamixel model
     ADDR_PRO_GOAL_POSITION      = 116
@@ -68,6 +69,7 @@ class Dynamixel():
         None.
 
         '''
+        super().__init__()
         self.running = True
         self.devicesID = devicesID
         # Initialize PortHandler instance
@@ -124,7 +126,7 @@ class Dynamixel():
     def set_all_position(self, angles):
         # Convert angles
         pulses = self._convert_angles(angles)
-        print(pulses)
+        #print(pulses)
         # Send to internal command
         self._send_goal_positions(pulses)
         
@@ -165,7 +167,6 @@ class Dynamixel():
         period = 0.01
         t = time.time()
         while self.running:
-            #print('Controller thread')
             t += period
             self.set_all_position(self.model.alpha)
             time.sleep(max(0,t-time.time()))
