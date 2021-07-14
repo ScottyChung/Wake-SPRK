@@ -5,7 +5,10 @@ Created on Tue Jul 13 12:56:58 2021
 @author: schung
 """
 
+import sys
+
 from PyQt5 import QtWidgets, uic
+from PyQt5.QtWidgets import QApplication
 from pyqtgraph.opengl import GLViewWidget, GLGridItem
 import numpy as np
 from wfu_stewart import Platform
@@ -102,4 +105,6 @@ class Ui(QtWidgets.QMainWindow):
         self.enableBtn.clicked.disconnect()
         self.enableBtn.clicked.connect(self.enable_clicked)
 
+app = QApplication(sys.argv)
 ui = Ui()
+app.exec_()

@@ -54,7 +54,19 @@ class Viewer(Thread):
         self.legs = GLLinePlotItem(pos=legPoints, color=(1,1,1,0.5), mode='lines')
         self.glViewWidget.addItem(self.legs)
         
-        self.top_poly = GLMeshItem(verts=self.platformPoints)
+        # Data servo horns
+        hornPoints = np.array([j for i in zip(self.model.a, self.model.baseJoints) for j in i])
+        self.servoHorns = GLLinePlotItem(pos=hornPoints, color=(0,1,0,0.5), mode='lines')
+        self.glViewWidget.addItem(self.servoHorns)
+        
+        # Platform Poly
+        self.top_poly = GLMeshItem(vertexes=np.array(self.platformPoints[:,0:3]), 
+                                   faces=np.array([[0,1,2],
+                                                   [0,2,3],
+                                                   [0,3,4],
+                                                   [0,4,5]]),
+                                   color=(0,0,1,0.5))
+        self.top_poly.setGLOptions('additive')
         self.glViewWidget.addItem(self.top_poly)
         '''
         pos = np.random.random(size=(100000,3))
@@ -114,6 +126,16 @@ class Viewer(Thread):
         self.platformPoints = np.matmul(self.model.desired_pose, p).transpose()
         legPoints = np.array([j for i in zip(self.model.a, self.platformPoints[:,0:3]) for j in i])
         self.legs.setData(pos=legPoints, color=(1,1,1,0.5), antialias=True)
+        
+        hornPoints = np.array([j for i in zip(self.model.a, self.model.baseJoints) for j in i])
+        self.servoHorns.setData(pos=hornPoints, antialias=True)
+        
+        # Platform Face
+        self.top_poly.setMeshData(vertexes=np.array(self.platformPoints[:,0:3]),
+                                  faces=np.array([[0,1,2],
+                                                   [0,2,3],
+                                                   [0,3,4],
+                                                   [0,4,5]]))
         '''
         verts = [tuple(p) for p in p_base[:,0:3]]
         top_poly.set_verts([verts])
