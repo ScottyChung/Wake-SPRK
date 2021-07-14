@@ -9,11 +9,12 @@ import sys
 
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QApplication
-from pyqtgraph.opengl import GLViewWidget, GLGridItem
+from pyqtgraph.opengl import GLViewWidget
 import numpy as np
 from wfu_stewart import Platform
 from dynamixel import Dynamixel
 from viewerGL import Viewer
+from trajectory import Trajectory
 
 class Ui(QtWidgets.QMainWindow):
     ''' Viewer that listens to user input'''
@@ -34,17 +35,26 @@ class Ui(QtWidgets.QMainWindow):
         self.xSlider.valueChanged.connect(self.update_position)
         self.ySlider.valueChanged.connect(self.update_position)
         self.zSlider.valueChanged.connect(self.update_position)
+        self.sliders = [self.xSlider,
+                        self.ySlider,
+                        self.zSlider]
         
         # Connect dials
         self.xDial.valueChanged.connect(self.update_rotation)
         self.yDial.valueChanged.connect(self.update_rotation)
         self.zDial.valueChanged.connect(self.update_rotation)
+        self.dials = [self.xDial,
+                      self.yDial,
+                      self.zDial]
         
         # Connect button motors
         self.enableBtn.clicked.connect(self.enable_clicked)
         
         # Connect home button
         self.homeBtn.clicked.connect(self.home_clicked)
+        
+        # Connect trajectory button
+        self.runTrajectoryBtn.clicked.connect(self.run_trajectory)
         
         # Set dynamixel to none at start
         self.dynamixel = None
@@ -58,6 +68,21 @@ class Ui(QtWidgets.QMainWindow):
         
         self.show() # Show the GUI
         
+    def run_trajectory(self):
+        self.disable_user()
+        trajectory = Trajectory(self, self.enable_user)
+        trajectory.start()
+        
+    def disable_user(self):
+        ui = self.sliders + self.dials
+        for w in ui:
+            w.setDisabled(True)
+            
+    def enable_user(self):
+        ui = self.sliders + self.dials
+        for w in ui:
+            w.setDisabled(False)
+            
     def home_clicked(self):
         # Block signals on sliders till last call
         widgetList = [self.xSlider, 
@@ -67,10 +92,11 @@ class Ui(QtWidgets.QMainWindow):
                       self.yDial, 
                       self.zDial]
         for w in widgetList:
-            #w.blockSignals(True)
+            w.blockSignals(True)
             w.setValue(0)
-            #w.blockSignals(False)
-        #widgetList[0].setValue(0)
+            w.blockSignals(False)
+        self.update_position()
+        self.update_rotation()
             
     def update_position(self):
         self.platform.translate(np.array([self.xSlider.value(),

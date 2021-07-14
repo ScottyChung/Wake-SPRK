@@ -15,16 +15,16 @@ import matplotlib.pyplot as plt
 class Platform:
         
         def __init__(self,
-                     height=220.2,
+                     height=175.43,
                      horn_length=60,
-                     leg_length=229.5):
+                     leg_length=185.205):
             self.initial_height = height
             self.horn_length = horn_length
             self.leg_length = leg_length
             
             #Platform Joint locations
-            pJ1 = np.array([-16.5,87,0])
-            pJ2 = np.array([16.5,87,0])
+            pJ1 = np.array([-15.45,85.83,0])
+            pJ2 = np.array([15.45,85.83,0])
             pJ3 = R.from_euler('z',-120, degrees=True).apply(pJ1)
             pJ4 = R.from_euler('z',-120, degrees=True).apply(pJ2)
             pJ5 = R.from_euler('z',120, degrees=True).apply(pJ1)

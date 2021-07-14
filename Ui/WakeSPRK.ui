@@ -168,6 +168,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="runTrajectoryBtn">
+          <property name="text">
+           <string>Run Trajectory</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="enableBtn">
           <property name="text">
            <string>Enable Motors</string>
