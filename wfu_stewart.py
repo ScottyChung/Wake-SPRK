@@ -82,10 +82,13 @@ class Platform:
             rotation = R.from_euler('xyz',angles,degrees=True).as_matrix()
             return self.update_pose(rotation = rotation)
         
-        def update_pose(self,translation=None,rotation=None):
+        def update_pose(self,translation=None,rotation=None, euler=None):
             if translation is not None:
                 translation = self.height_offset(translation)
                 self.desired_pose[0:3,3] = translation
+                
+            if euler:
+                rotation = R.from_euler('xyz',rotation,degrees=True).as_matrix()
             if rotation is not None:
                 self.desired_pose[0:3,0:3] = rotation
             
@@ -108,19 +111,19 @@ class Platform:
             #print(self.alpha)
             if True:
                 self.visual_calculations()
+                
             return self.alpha
         
         def visual_calculations(self):
-        
-            self.a = []
+            a = []
             for i in range(0,6):
                 x = self.horn_length*np.cos(self.alpha[i])*np.cos(self.beta[i]) 
                 y = self.horn_length*np.cos(self.alpha[i])*np.sin(self.beta[i]) 
                 z = self.horn_length*np.sin(self.alpha[i]) 
                 
                 point = np.array([x,y,z])+self.baseJoints[i]
-                self.a.append(point)
-            self.a = np.array(self.a)
+                a.append(point)
+            self.a = np.array(a)
             
         def calculate_q(self,
                         desired_pose):

@@ -68,45 +68,7 @@ class Viewer(Thread):
                                    color=(0,0,1,0.5))
         self.top_poly.setGLOptions('additive')
         self.glViewWidget.addItem(self.top_poly)
-        '''
-        pos = np.random.random(size=(100000,3))
-        pos *= [10,-10,10]
-        pos[0] = (0,0,0)
-        color = np.ones((pos.shape[0], 4))
-        d2 = (pos**2).sum(axis=1)**0.5
-        size = np.random.random(size=pos.shape[0])*10
-        sp2 = gl.GLScatterPlotItem(pos=pos, color=(1,1,1,1), size=size)
-        phase = 0.
-        
-        w.addItem(sp2)
-        
-        
-        verts = [tuple(p) for p in p_base[:,0:3]]
-        poly = Poly3DCollection([verts], alpha=0.8)
-        ax.add_collection3d(poly)
-        
-        
-        # Drawing Legs
-        leg_lines = []
-        for i in range(0,6):
-            leg_lines.append(ax.plot3D([platform.a[i,0],p_base[i,0]],
-                  [platform.a[i,1],p_base[i,1]],
-                  [platform.a[i,2],p_base[i,2]],
-                  color='k',
-                  alpha=0.3))
-       
-        
-        
-        
-        # Drawing Servo Horns
-        horn_lines = []
-        for i in range(0,6):
-            horn_lines.append(ax.plot3D([platform.baseJoints[i,0], platform.a[i,0]],
-                      [platform.baseJoints[i,1], platform.a[i,1]],
-                      [platform.baseJoints[i,2], platform.a[i,2]], 
-                      color='g',
-                      alpha=0.3))
-    '''
+      
     
     def update(self, angles):
         # Data for three-dimensional scattered points
@@ -114,6 +76,8 @@ class Viewer(Thread):
         p = np.concatenate((p,np.ones((1,6))))
         
         p_base = np.matmul(self.model.desired_pose, p).transpose()
+        
+        # Platform Points
         self.sp.setData(pos=p_base)
         
         # Base Points
@@ -136,23 +100,6 @@ class Viewer(Thread):
                                                    [0,2,3],
                                                    [0,3,4],
                                                    [0,4,5]]))
-        '''
-        verts = [tuple(p) for p in p_base[:,0:3]]
-        top_poly.set_verts([verts])
-        
-        # Drawing legs
-        for i,l in enumerate(leg_lines):
-            l[0].set_data_3d([platform.a[i,0],p_base[i,0]],
-                  [platform.a[i,1],p_base[i,1]],
-                  [platform.a[i,2],p_base[i,2]])
-            
-        # Drawing horn lines
-        for i,l in enumerate(horn_lines):
-            l[0].set_data_3d([platform.baseJoints[i,0], platform.a[i,0]],
-                      [platform.baseJoints[i,1], platform.a[i,1]],
-                      [platform.baseJoints[i,2], platform.a[i,2]])
-        return [top_points]
-        '''
         
     def run(self):
         #Run at specified rate

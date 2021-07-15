@@ -38,6 +38,7 @@ class Dynamixel(Thread):
     ADDR_PRO_TORQUE_ENABLE      = 64               # Control table address is different in Dynamixel model
     ADDR_PRO_GOAL_POSITION      = 116
     ADDR_PRO_PRESENT_POSITION   = 132
+    ADDR_PROFILE_ACCEL          = 108
     
     # Data Byte Length
     LEN_PRO_GOAL_POSITION       = 4
@@ -106,6 +107,21 @@ class Dynamixel(Thread):
                                              self.packetHandler, 
                                              self.ADDR_PRO_GOAL_POSITION, 
                                              self.LEN_PRO_GOAL_POSITION)
+        
+    def set_acceleration(self, accel):
+        for d in self.devicesID:
+            dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, 
+                                                                             d, 
+                                                                             self.ADDR_PROFILE_ACCEL, 
+                                                                             accel)
+            if dxl_comm_result != COMM_SUCCESS:
+                print("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
+            elif dxl_error != 0:
+                print("%s" % self.packetHandler.getRxPacketError(dxl_error))
+            else:
+                print("Dynamixel has been successfully connected")
+        
+    
     def enable_all_torque(self):
         for d in self.devicesID:
             self.enable_torque(d)
@@ -137,13 +153,16 @@ class Dynamixel(Thread):
         pulses[1::2] = [-p + 3072 for p in pulses[1::2]] # Even index motor adjustment
         return pulses
     
+    def _byte_array(self, val):
+        return [DXL_LOBYTE(DXL_LOWORD(val)), 
+                DXL_HIBYTE(DXL_LOWORD(val)), 
+                DXL_LOBYTE(DXL_HIWORD(val)), 
+                DXL_HIBYTE(DXL_HIWORD(val))]
+    
     def _send_goal_positions(self, dxl_goal_positions):
         # Allocate goal position value into byte array
         for idx, pos in enumerate(dxl_goal_positions):
-            param_goal_position = [DXL_LOBYTE(DXL_LOWORD(pos)), 
-                                   DXL_HIBYTE(DXL_LOWORD(pos)), 
-                                   DXL_LOBYTE(DXL_HIWORD(pos)), 
-                                   DXL_HIBYTE(DXL_HIWORD(pos))]
+            param_goal_position = self._byte_array(pos)
             
             dxl_addparam_result = self.groupSyncWrite.addParam(self.devicesID[idx],
                                                                param_goal_position)

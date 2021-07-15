@@ -47,6 +47,9 @@ class Ui(QtWidgets.QMainWindow):
                       self.yDial,
                       self.zDial]
         
+        # Connect accel dial
+        self.accelDial.valueChanged.connect(self.update_accel)
+        
         # Connect button motors
         self.enableBtn.clicked.connect(self.enable_clicked)
         
@@ -67,6 +70,9 @@ class Ui(QtWidgets.QMainWindow):
         self.viewer.start()
         
         self.show() # Show the GUI
+        
+    def update_accel(self):
+        self.dynamixel.set_acceleration(self.accelDial.value())
         
     def run_trajectory(self):
         self.disable_user()

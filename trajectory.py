@@ -8,6 +8,7 @@ Created on Wed Jul 14 12:03:00 2021
 from threading import Thread
 import numpy as np
 import time
+import pandas as pd
 
 class Trajectory(Thread):
     
@@ -28,18 +29,14 @@ class Trajectory(Thread):
         '''
         
         # Don't Chage
-        command_rate = 50
+        command_rate = 100
         
-        # Safe to change
-        total_time = 5
+        data = pd.read_csv('lung_trajectory.csv')
         
-        # leave alone
-        t = np.linspace(0,total_time,command_rate*total_time)
-        
-        z = 15*np.sin((2*np.pi)/2*t)
-        
-        for idx, step in enumerate(t):
-            self.app.zSlider.setValue(z[idx])
+        for index, row in data.iterrows():
+            translation = [row.x,row.y,row.z]
+            rotation = [row.rx,row.ry,row.rz]
+            self.app.platform.update_pose(translation, rotation,euler=True)
             time.sleep(1/command_rate)
             
         # KEEP
