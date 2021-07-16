@@ -1,3 +1,5 @@
+# Caution not yet released!!! Some hard-coded values remaining
+
 # Wake-SPRK
 Inspired by previous work to utilize a 6-DOF stewart platform design using [RSS links][1], this project provides a method to simulate motion to be used with a surgical robotic system.
 The features of this project include:
@@ -11,6 +13,7 @@ TODO
 ## Dependencies
 * Python 3 (recommend anaconda for common modules, conda environments, and spyder ide)
 * pyqtgraph for fast visualization (depricated matplotlib viewer is given, but has poor performance)
+* pyopengl for visualization
 * Dynamixel SDK (generic driver installation might need to be included)
 
 ## Getting Started
