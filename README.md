@@ -1,6 +1,8 @@
 # Caution not yet released!!! Some hard-coded values remaining
 
 # Wake-SPRK
+![Steve][SteveDance]
+
 Inspired by previous work to utilize a 6-DOF stewart platform design using [RSS links][1], this project provides a method to simulate motion to be used with a surgical robotic system.
 The features of this project include:
 * OpenGL visualization tool (pyqtgraph module)
@@ -54,3 +56,4 @@ TODO
 [4]: https://www.python.org/downloads/
 [5]: https://www.spyder-ide.org/
 [6]: https://www.anaconda.com/
+[SteveDance]: https://github.com/ScottyChung/Wake-SPRK/blob/master/Steve%20Dance.gif
