@@ -73,10 +73,8 @@ class Ui(QtWidgets.QMainWindow):
         self.viewer = Viewer(self.GLViewWidget, self.platform)
         self.viewer.start()
         
-        # Add trajectory object
-        self.traj = Trajectory(self, self.enable_user)
         
-        # Connect address combo box
+        # Connect address combo box TODO Less hacky
         self.addrCBox.currentIndexChanged.connect(self.addr_combo)
         self.addr_map = [84, #Fix magic numbers
                          82,
@@ -84,6 +82,13 @@ class Ui(QtWidgets.QMainWindow):
                          112,
                          108]
         
+        # Map of sin boxes TODO less hacky
+        self.axisMap = {'X Position':0,
+                        'Y Position':1,
+                        'Z Position':2,
+                        'X Rotation':3,
+                        'Y Rotation':4,
+                        'Z Rotation':5}
         self.show() # Show the GUI
        
     def addr_combo(self):
@@ -91,21 +96,30 @@ class Ui(QtWidgets.QMainWindow):
         self.addrLine.setText(addr_str)
         
     def run_sine(self):
+        # TODO Cleanup simplify
         self.runSineBtn.clicked.disconnect()
         self.runSineBtn.clicked.connect(self.stop_sine)
         self.runSineBtn.setText('Stop')
         self.disable_user()
-            
+        # Add trajectory object
+        self.traj = Trajectory(self, self.enable_user)
         self.traj.running = True
         self.traj.sine = True
+        print(self.sinBtnGrp.checkedButton().text())
+        self.traj.axis = self.axisMap[self.sinBtnGrp.checkedButton().text()]
+        print(self.sinBtnGrp.checkedId())
         self.traj.amp = float(self.ampLine.text())
         self.traj.period = float(self.periodLine.text())
         self.traj.start()
         
     def stop_sine(self):
+        # Stop thread
         self.traj.running = False
+        
+        # Reassign Button
         self.runSineBtn.clicked.disconnect()
         self.runSineBtn.clicked.connect(self.run_sine)
+        self.runSineBtn.setText('Run')
         self.enable_user()
         
     def send_packet(self):
@@ -168,7 +182,7 @@ class Ui(QtWidgets.QMainWindow):
         self.enableBtn.clicked.connect(self.remove_dynamixel)
         
     def create_dynamixel(self):
-        self.dynamixel = Dynamixel('COM5', [1,2,3,4,5,6])
+        self.dynamixel = Dynamixel(self.portNameLine.text(), [1,2,3,4,5,6])
         self.dynamixel.add_model(self.platform)
         
     def remove_dynamixel(self):
