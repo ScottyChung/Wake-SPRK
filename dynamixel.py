@@ -108,19 +108,20 @@ class Dynamixel(Thread):
                                              self.ADDR_PRO_GOAL_POSITION, 
                                              self.LEN_PRO_GOAL_POSITION)
         
-    def set_acceleration(self, accel):
-        for d in self.devicesID:
+    def send_to_all(self, addr, data):
+        
+         for d in self.devicesID:
             dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, 
                                                                              d, 
-                                                                             self.ADDR_PROFILE_ACCEL, 
-                                                                             accel)
+                                                                             addr, 
+                                                                             data)
             if dxl_comm_result != COMM_SUCCESS:
                 print("%s" % self.packetHandler.getTxRxResult(dxl_comm_result))
             elif dxl_error != 0:
                 print("%s" % self.packetHandler.getRxPacketError(dxl_error))
             else:
                 print("Dynamixel has been successfully connected")
-        
+                      
     
     def enable_all_torque(self):
         for d in self.devicesID:

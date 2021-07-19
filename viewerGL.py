@@ -18,7 +18,7 @@ class Viewer(Thread):
         self.glViewWidget = glViewWidget
         
         # Set viewing distance
-        self.glViewWidget.opts['distance'] = 1200
+        self.glViewWidget.opts['distance'] = 700
         self.glViewWidget.opts['azimuth'] = -60
         self.glViewWidget.opts['elevation'] = 35
         

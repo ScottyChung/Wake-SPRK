@@ -16,8 +16,15 @@ class Trajectory(Thread):
         super().__init__()
         self.app = app
         self.callback = callback
+         # Don't Chage
+        self.command_rate = 100
         
     def run(self):
+        self.running = True
+        if self.sine:
+            self.run_sine()
+            
+    def run_lung(self):
         
         ''' Write trajectory here by adjusting the corresponding sliders
         xSlider: X position
@@ -28,16 +35,28 @@ class Trajectory(Thread):
         zDial: Z Rotation
         '''
         
-        # Don't Chage
-        command_rate = 100
-        
         data = pd.read_csv('lung_trajectory.csv')
         
         for index, row in data.iterrows():
             translation = [row.x,row.y,row.z]
             rotation = [row.rx,row.ry,row.rz]
             self.app.platform.update_pose(translation, rotation,euler=True)
-            time.sleep(1/command_rate)
+            time.sleep(1/self.command_rate)
             
         # KEEP
         self.callback()
+        
+    def run_sine(self):
+        period = 1/self.command_rate
+        next_t = time.time()
+        start_time = time.time()
+        while self.running:
+            next_t += period
+            dt = time.time()-start_time
+            motion = self.amp*np.sin((2*np.pi)/self.period*dt)
+            self.app.platform.update_pose([0,0,motion], [0]*3, euler=True)
+            time.sleep(max(0,next_t-time.time()))
+            
+    def stop(self):
+        self.running = False
+    

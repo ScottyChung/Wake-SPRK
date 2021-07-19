@@ -24,13 +24,11 @@ class Ui(QtWidgets.QMainWindow):
         
         # Replace placeholder widget
         self.GLViewWidget = GLViewWidget(self.openGLWidget.parent())
-        self.leftLayout.replaceWidget(self.openGLWidget, self.GLViewWidget)
+        self.visualLayout.replaceWidget(self.openGLWidget, self.GLViewWidget)
         
-        # Set policy to preferred horizontal and min expanding vertical
-        self.GLViewWidget.setSizePolicy(5,3)
-        
-
-        
+        # Set size policy
+        self.GLViewWidget.setSizePolicy(5,5)
+        self.GLViewWidget.setMinimumSize(500,500)
         # Connect sliders
         self.xSlider.valueChanged.connect(self.update_position)
         self.ySlider.valueChanged.connect(self.update_position)
@@ -48,7 +46,7 @@ class Ui(QtWidgets.QMainWindow):
                       self.zDial]
         
         # Connect accel dial
-        self.accelDial.valueChanged.connect(self.update_accel)
+        #self.accelDial.valueChanged.connect(self.update_accel)
         
         # Connect button motors
         self.enableBtn.clicked.connect(self.enable_clicked)
@@ -62,6 +60,12 @@ class Ui(QtWidgets.QMainWindow):
         # Set dynamixel to none at start
         self.dynamixel = None
         
+        # Connect send packet button
+        self.sendPacket.clicked.connect(self.send_packet)
+        
+        # Run sine wave
+        self.runSineBtn.clicked.connect(self.run_sine)
+        
         # Initial the model
         self.platform = Platform()
         
@@ -69,7 +73,44 @@ class Ui(QtWidgets.QMainWindow):
         self.viewer = Viewer(self.GLViewWidget, self.platform)
         self.viewer.start()
         
+        # Add trajectory object
+        self.traj = Trajectory(self, self.enable_user)
+        
+        # Connect address combo box
+        self.addrCBox.currentIndexChanged.connect(self.addr_combo)
+        self.addr_map = [84, #Fix magic numbers
+                         82,
+                         80,
+                         112,
+                         108]
+        
         self.show() # Show the GUI
+       
+    def addr_combo(self):
+        addr_str = str(self.addr_map[self.addrCBox.currentIndex()])
+        self.addrLine.setText(addr_str)
+        
+    def run_sine(self):
+        self.runSineBtn.clicked.disconnect()
+        self.runSineBtn.clicked.connect(self.stop_sine)
+        self.runSineBtn.setText('Stop')
+        self.disable_user()
+            
+        self.traj.running = True
+        self.traj.sine = True
+        self.traj.amp = float(self.ampLine.text())
+        self.traj.period = float(self.periodLine.text())
+        self.traj.start()
+        
+    def stop_sine(self):
+        self.traj.running = False
+        self.runSineBtn.clicked.disconnect()
+        self.runSineBtn.clicked.connect(self.run_sine)
+        self.enable_user()
+        
+    def send_packet(self):
+        self.dynamixel.send_to_all(int(self.addrLine.text()), 
+                                   int(self.dataLine.text()))
         
     def update_accel(self):
         self.dynamixel.set_acceleration(self.accelDial.value())
