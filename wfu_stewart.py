@@ -9,8 +9,6 @@ Stewart platform model and visualization
 
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-from mpl_toolkits import mplot3d
-import matplotlib.pyplot as plt
 
 class Platform:
         
@@ -23,8 +21,8 @@ class Platform:
             self.leg_length = leg_length
             
             #Platform Joint locations
-            pJ1 = np.array([-15.45,85.83,0])
-            pJ2 = np.array([15.45,85.83,0])
+            pJ1 = np.array([-22.5,87.1,0])
+            pJ2 = np.array([22.5,87.1,0])
             pJ3 = R.from_euler('z',-120, degrees=True).apply(pJ1)
             pJ4 = R.from_euler('z',-120, degrees=True).apply(pJ2)
             pJ5 = R.from_euler('z',120, degrees=True).apply(pJ1)
@@ -32,8 +30,8 @@ class Platform:
             self.platformJoints = np.array([pJ1,pJ2,pJ3,pJ4,pJ5,pJ6])
             
             #Base Joint Locations
-            bJ1 = np.array([-52.7,115.48,0])
-            bJ2 = np.array([52.7,115.48,0])
+            bJ1 = np.array([-15.5,85.1,0])
+            bJ2 = np.array([15.5,85.1,0])
             bJ3 = R.from_euler('z',-120, degrees=True).apply(bJ1)
             bJ4 = R.from_euler('z',-120, degrees=True).apply(bJ2)
             bJ5 = R.from_euler('z',120, degrees=True).apply(bJ1)

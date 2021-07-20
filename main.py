@@ -105,9 +105,7 @@ class Ui(QtWidgets.QMainWindow):
         self.traj = Trajectory(self, self.enable_user)
         self.traj.running = True
         self.traj.sine = True
-        print(self.sinBtnGrp.checkedButton().text())
         self.traj.axis = self.axisMap[self.sinBtnGrp.checkedButton().text()]
-        print(self.sinBtnGrp.checkedId())
         self.traj.amp = float(self.ampLine.text())
         self.traj.period = float(self.periodLine.text())
         self.traj.start()
