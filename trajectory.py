@@ -21,8 +21,10 @@ class Trajectory(Thread):
         
     def run(self):
         self.running = True
-        if self.sine:
+        if self.wave == 'Sine':
             self.run_sine()
+        elif self.wave == 'Square':
+            self.run_square()
             
     def run_lung(self):
         

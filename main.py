@@ -95,22 +95,25 @@ class Ui(QtWidgets.QMainWindow):
         addr_str = str(self.addr_map[self.addrCBox.currentIndex()])
         self.addrLine.setText(addr_str)
         
-    def run_sine(self):
-        # TODO Cleanup simplify
+    def toggle_trajectory(self):
         self.runSineBtn.clicked.disconnect()
         self.runSineBtn.clicked.connect(self.stop_sine)
         self.runSineBtn.setText('Stop')
         self.disable_user()
+        
+    def run_sine(self):
+        # TODO Cleanup simplify
+        self.toggle_trajectory()
+        
         # Add trajectory object
         self.traj = Trajectory(self, self.enable_user)
         self.traj.running = True
-        self.traj.sine = True
-        print(self.sinBtnGrp.checkedButton().text())
+        self.traj.wave = self.waveBox.currentText()
         self.traj.axis = self.axisMap[self.sinBtnGrp.checkedButton().text()]
-        print(self.sinBtnGrp.checkedId())
         self.traj.amp = float(self.ampLine.text())
         self.traj.period = float(self.periodLine.text())
         self.traj.start()
+        
         
     def stop_sine(self):
         # Stop thread
