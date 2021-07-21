@@ -9,6 +9,7 @@ The features of this project include:
 * Motor communication with Dynamixel controller (specific motors used XM430-W210)
 * (WIP) Optional ROS interface with command and read topics including TF information
 
+![UI][Media/ui.png]
 ## Examples
 TODO 
 
@@ -56,4 +57,4 @@ TODO
 [4]: https://www.python.org/downloads/
 [5]: https://www.spyder-ide.org/
 [6]: https://www.anaconda.com/
-[SteveDance]: https://github.com/ScottyChung/Wake-SPRK/blob/master/Steve%20Dance.gif
+[SteveDance]: Media/Steve%20Dance.gif
