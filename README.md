@@ -9,7 +9,7 @@ The features of this project include:
 * Motor communication with Dynamixel controller (specific motors used XM430-W210)
 * (WIP) Optional ROS interface with command and read topics including TF information
 
-![UI][Media/ui.png]
+![UI](Media/ui.PNG)
 ## Examples
 TODO 
 
