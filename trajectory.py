@@ -18,6 +18,7 @@ class Trajectory(Thread):
         self.callback = callback
          # Don't Chage
         self.command_rate = 100
+        self.wave = None
         
     def run(self):
         self.running = True
@@ -25,6 +26,8 @@ class Trajectory(Thread):
             self.run_sine()
         elif self.wave == 'Square':
             self.run_square()
+        else:
+            self.run_lung()
             
     def run_lung(self):
         
