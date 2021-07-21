@@ -181,7 +181,19 @@ class Dynamixel(Thread):
     
     def add_model(self, model):
         self.model = model
-    
+        
+    def read_address(self, address):
+         # Read present position
+        message, result, error = self.packetHandler.read4ByteTxRx(self.portHandler, 
+                                                                  1, 
+                                                                  address)
+        if result != COMM_SUCCESS:
+            print("%s" % self.packetHandler.getTxRxResult(result))
+        elif error != 0:
+            print("%s" % self.packetHandler.getRxPacketError(error))
+            
+        return message
+            
     def run(self):
         #Run at specified rate
         period = 0.01

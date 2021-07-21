@@ -92,8 +92,10 @@ class Ui(QtWidgets.QMainWindow):
         self.show() # Show the GUI
 
     def addr_combo(self):
-        addr_str = str(self.addr_map[self.addrCBox.currentIndex()])
+        addr = self.addr_map[self.addrCBox.currentIndex()]
+        addr_str = str(addr)
         self.addrLine.setText(addr_str)
+        print(self.dynamixel.read_address(addr))
 
     def toggle_trajectory(self):
         self.runSineBtn.clicked.disconnect()
