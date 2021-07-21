@@ -1,4 +1,4 @@
-# Caution not yet released!!! Some hard-coded values remaining
+# Not Released Version. Use at own risk
 
 # Wake-SPRK
 ![Steve][SteveDance]
