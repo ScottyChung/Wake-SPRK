@@ -40,7 +40,7 @@ class Trajectory(Thread):
         zDial: Z Rotation
         '''
         
-        data = pd.read_csv('lung_trajectory.csv')
+        data = pd.read_csv(self.traj_file)
         
         for index, row in data.iterrows():
             translation = [row.x,row.y,row.z]
@@ -63,6 +63,14 @@ class Trajectory(Thread):
             pose[self.axis] = motion
             self.app.platform.update_pose(pose[0:3], pose[3:6], euler=True)
             time.sleep(max(0,next_t-time.time()))
+          
+    def run_square(self):
+        pose = [0]*6
+        start_time = time.time()
+        while self.running:
+            motion = self.amp
+            
+            self.app.platform.update_pose(pose[0:3], pose[3:6], euler=True)
             
     def stop(self):
         self.running = False

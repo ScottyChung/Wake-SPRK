@@ -8,7 +8,7 @@ Created on Tue Jul 13 12:56:58 2021
 import sys
 
 from PyQt5 import QtWidgets, uic
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QFileDialog
 from pyqtgraph.opengl import GLViewWidget
 import numpy as np
 from wfu_stewart import Platform
@@ -89,8 +89,15 @@ class Ui(QtWidgets.QMainWindow):
                         'X Rotation':3,
                         'Y Rotation':4,
                         'Z Rotation':5}
+        
+        self.loadTrajBtn.clicked.connect(self.load_trajectory)
         self.show() # Show the GUI
 
+    def load_trajectory(self):
+        filename,_ = QFileDialog.getOpenFileName(self, 'Open Topic List', '','')
+        self.traj_file = filename
+        self.trajFileLine.setText(str(filename))
+        
     def addr_combo(self):
         addr = self.addr_map[self.addrCBox.currentIndex()]
         addr_str = str(addr)
@@ -136,7 +143,9 @@ class Ui(QtWidgets.QMainWindow):
 
     def run_trajectory(self):
         self.disable_user()
+        self.runTrajectoryBtn.setDisabled(True)
         trajectory = Trajectory(self, self.enable_user)
+        trajectory.traj_file = self.traj_file
         trajectory.start()
 
     def disable_user(self):
@@ -145,6 +154,7 @@ class Ui(QtWidgets.QMainWindow):
             w.setDisabled(True)
 
     def enable_user(self):
+        self.runTrajectoryBtn.setDisabled(False)
         ui = self.sliders + self.dials
         for w in ui:
             w.setDisabled(False)
