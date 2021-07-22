@@ -66,11 +66,14 @@ class Trajectory(Thread):
           
     def run_square(self):
         pose = [0]*6
-        start_time = time.time()
         while self.running:
             motion = self.amp
-            
+            pose[self.axis] = motion
             self.app.platform.update_pose(pose[0:3], pose[3:6], euler=True)
+            time.sleep(self.period/2)
+            pose[self.axis] = 0
+            self.app.platform.update_pose(pose[0:3], pose[3:6], euler=True)
+            time.sleep(self.period/2)      
             
     def stop(self):
         self.running = False
