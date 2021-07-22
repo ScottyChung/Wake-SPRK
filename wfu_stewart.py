@@ -13,7 +13,7 @@ from scipy.spatial.transform import Rotation as R
 class Platform:
         
         def __init__(self,
-                     height=175.43,
+                     height=181.9,
                      horn_length=60,
                      leg_length=189.7):
             self.initial_height = height

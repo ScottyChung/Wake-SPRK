@@ -128,8 +128,12 @@ class Ui(QtWidgets.QMainWindow):
         self.enable_user()
 
     def send_packet(self):
+        if self.addrCBox.currentIndex()==0: #TODO better check If P gain
+            num_bytes = 4
+        else:
+            num_bytes = 2
         self.dynamixel.send_to_all(int(self.addrLine.text()),
-                                   int(self.dataLine.text()))
+                                   int(self.dataLine.text()), num_bytes)
 
     def update_accel(self):
         self.dynamixel.set_acceleration(self.accelDial.value())

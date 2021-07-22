@@ -108,10 +108,16 @@ class Dynamixel(Thread):
                                              self.ADDR_PRO_GOAL_POSITION, 
                                              self.LEN_PRO_GOAL_POSITION)
         
-    def send_to_all(self, addr, data):
+    def send_to_all(self, addr, data, num_bytes):
         
          for d in self.devicesID:
-            dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, 
+            if num_bytes == 4:
+                dxl_comm_result, dxl_error = self.packetHandler.write4ByteTxRx(self.portHandler, 
+                                                                             d, 
+                                                                             addr, 
+                                                                             data)
+            elif num_bytes == 2:
+                dxl_comm_result, dxl_error = self.packetHandler.write2ByteTxRx(self.portHandler, 
                                                                              d, 
                                                                              addr, 
                                                                              data)
