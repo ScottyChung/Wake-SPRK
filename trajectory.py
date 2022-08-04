@@ -43,6 +43,8 @@ class Trajectory(Thread):
         data = pd.read_csv(self.traj_file)
         
         for index, row in data.iterrows():
+            if not self.running:
+                break
             translation = [row.x,row.y,row.z]
             rotation = [row.rx,row.ry,row.rz]
             self.app.platform.update_pose(translation, rotation,euler=True)

@@ -97,6 +97,41 @@ class Ui(QtWidgets.QMainWindow):
         filename,_ = QFileDialog.getOpenFileName(self, 'Open Topic List', '','')
         self.traj_file = filename
         self.trajFileLine.setText(str(filename))
+
+    def run_trajectory(self):
+        self.toggle_csv_trajectory()
+        self.traj = Trajectory(self, self.enable_user)
+        self.traj.traj_file = self.traj_file
+        self.traj.start()
+
+    def toggle_csv_trajectory(self):
+        self.disable_user()
+        self.runSineBtn.setDisabled(True)
+        self.runTrajectoryBtn.clicked.disconnect()
+        self.runTrajectoryBtn.clicked.connect(self.stop_csv_trajectory)
+        self.runTrajectoryBtn.setText('Stop')
+
+    def stop_csv_trajectory(self):
+        # Stop thread
+        self.traj.running = False
+
+        # Reassign Button
+        self.runTrajectoryBtn.clicked.disconnect()
+        self.runTrajectoryBtn.clicked.connect(self.run_trajectory)
+        self.runTrajectoryBtn.setText('Run Trajectory')
+        self.enable_user()
+
+    def disable_user(self):
+        ui = self.sliders + self.dials
+        for w in ui:
+            w.setDisabled(True)
+
+    def enable_user(self):
+        self.runTrajectoryBtn.setEnabled(True)
+        self.runSineBtn.setEnabled(True)
+        ui = self.sliders + self.dials
+        for w in ui:
+            w.setDisabled(False)
         
     def addr_combo(self):
         addr = self.addr_map[self.addrCBox.currentIndex()]
@@ -105,6 +140,7 @@ class Ui(QtWidgets.QMainWindow):
         print(self.dynamixel.read_address(addr))
 
     def toggle_trajectory(self):
+        self.runTrajectoryBtn.setDisabled(True)
         self.runSineBtn.clicked.disconnect()
         self.runSineBtn.clicked.connect(self.stop_sine)
         self.runSineBtn.setText('Stop')
@@ -123,7 +159,6 @@ class Ui(QtWidgets.QMainWindow):
         self.traj.period = float(self.periodLine.text())
         self.traj.start()
 
-
     def stop_sine(self):
         # Stop thread
         self.traj.running = False
@@ -133,7 +168,7 @@ class Ui(QtWidgets.QMainWindow):
         self.runSineBtn.clicked.connect(self.run_sine)
         self.runSineBtn.setText('Run')
         self.enable_user()
-
+        
     def send_packet(self):
         if self.addrCBox.currentIndex()==0: #TODO better check If P gain
             num_bytes = 4
@@ -144,24 +179,6 @@ class Ui(QtWidgets.QMainWindow):
 
     def update_accel(self):
         self.dynamixel.set_acceleration(self.accelDial.value())
-
-    def run_trajectory(self):
-        self.disable_user()
-        self.runTrajectoryBtn.setDisabled(True)
-        trajectory = Trajectory(self, self.enable_user)
-        trajectory.traj_file = self.traj_file
-        trajectory.start()
-
-    def disable_user(self):
-        ui = self.sliders + self.dials
-        for w in ui:
-            w.setDisabled(True)
-
-    def enable_user(self):
-        self.runTrajectoryBtn.setDisabled(False)
-        ui = self.sliders + self.dials
-        for w in ui:
-            w.setDisabled(False)
 
     def home_clicked(self):
         # Block signals on sliders till last call
