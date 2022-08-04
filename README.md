@@ -11,7 +11,10 @@ The features of this project include:
 * Motor communication with Dynamixel controller (specific motors used XM430-W210)
 * (WIP) Optional ROS interface with command and read topics including TF information
 
-![UI](Media/ui.PNG)
+<p align="center">
+<img src=Media/ui.PNG>
+</p>
+
 ## Examples
 TODO 
 
@@ -50,11 +53,11 @@ conda install pyopengl
 ## Details
 There are two main ways to utilize this code. The easiest way is by using the UI. You can create desired trajecties at 100Hz sampling rate in a csv and then pass it through the UI to run the platform motion. Currently to loop a motion, you must manually just made the csv longer by copy and pasting the values.
 
-![UIMode](Media/UI Mode.png)
+![UIMode](Media/UI%20Mode.PNG)
 
 The other way is if you wanted to script the motions, connect it with ROS, etc. To do this, you must creat the platform object, initialize the motor interface, and pass the reference of the model to the motor interface. Then as you update the model, the motor interface will send commands to the controller.
 
-![HeadlessMode](Media/Headless Mode.png)
+![HeadlessMode](Media/Headless%20Mode.PNG)
 
 ## Future Work
 TODO
