@@ -1,7 +1,9 @@
 # Not Released Version. Use at own risk
 
 # Wake-SPRK
-![Steve][SteveDance]
+<p align="center">
+<img src=Media/Steve%20Dance.gif>
+</p>
 
 Inspired by previous work to utilize a 6-DOF stewart platform design using [RSS links][1], this project provides a method to simulate motion to be used with a surgical robotic system.
 The features of this project include:
@@ -45,10 +47,17 @@ conda install pyopengl
 ```
 5. Run the main.py file from the repository
 
+## Details
+There are two main ways to utilize this code. The easiest way is by using the UI. You can create desired trajecties at 100Hz sampling rate in a csv and then pass it through the UI to run the platform motion. Currently to loop a motion, you must manually just made the csv longer by copy and pasting the values.
+
+![UIMode](Media/UI Mode.png)
+
+The other way is if you wanted to script the motions, connect it with ROS, etc. To do this, you must creat the platform object, initialize the motor interface, and pass the reference of the model to the motor interface. Then as you update the model, the motor interface will send commands to the controller.
+
+![HeadlessMode](Media/Headless Mode.png)
+
 ## Future Work
 TODO
-
-
 
 
 [1]: https://github.com/BerkeleyAutomation/sprk]
